@@ -225,6 +225,7 @@ def render_chart_config(df: pd.DataFrame, profile: DataProfile) -> ChartConfig:
         opacity=st.session_state.get("opacity", 0.8),
         marker_style=st.session_state.get("marker_style", "circle"),
         line_style=st.session_state.get("line_style", "solid"),
+        y2_marker_style=st.session_state.get("y2_marker_style", "auto"),
         regression=RegressionConfig(
             enabled=st.session_state.get("regression_enabled", False),
             type=RegressionType(st.session_state.get("regression_type", "linear")),
@@ -329,6 +330,25 @@ def _render_advanced_options():
     
     with col2:
         st.checkbox("Axe Y secondaire commence à 0", value=False, key="y2_start_zero")
+    
+    # Secondary axis marker style
+    st.selectbox(
+        "Marqueur axe Y secondaire",
+        options=["auto", "circle", "square", "diamond", "cross", "x", "triangle-up", "triangle-down", "star"],
+        format_func=lambda x: {
+            "auto": "Automatique (différent de Y)",
+            "circle": "● Cercle",
+            "square": "■ Carré", 
+            "diamond": "◆ Losange",
+            "cross": "+ Croix",
+            "x": "× X",
+            "triangle-up": "▲ Triangle haut",
+            "triangle-down": "▼ Triangle bas",
+            "star": "★ Étoile",
+        }.get(x, x),
+        key="y2_marker_style",
+        help="Style de marqueur pour les courbes de l'axe Y secondaire"
+    )
     
     st.markdown("---")
     

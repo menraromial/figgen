@@ -232,6 +232,7 @@ class ChartConfig(BaseModel):
     opacity: float = 0.8
     marker_style: str = "circle"  # circle, square, diamond, cross, x, triangle
     line_style: str = "solid"  # solid, dash, dot, dashdot
+    y2_marker_style: str = "auto"  # auto, or specific marker for secondary Y axis
     
     # Annotations
     show_values: bool = False

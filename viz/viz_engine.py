@@ -135,8 +135,12 @@ class VizEngine:
             # Add secondary Y axis traces
             for i, y_col in enumerate(config.y2_columns):
                 color_idx = len(config.y_columns) + i
-                # Use different symbol set for secondary axis to distinguish
-                y2_symbol = symbol_list[(len(config.y_columns) + i) % len(symbol_list)]
+                # Use configured marker or auto-cycle if "auto"
+                if config.y2_marker_style == "auto":
+                    y2_symbol = symbol_list[(len(config.y_columns) + i) % len(symbol_list)]
+                else:
+                    y2_symbol = config.y2_marker_style
+                    
                 fig.add_trace(
                     go.Scatter(
                         x=df[config.x_column] if config.x_column else df.index,
@@ -739,23 +743,25 @@ class VizEngine:
         
         # Note: We don't update marker symbols globally here because
         # multiple Y column charts set unique symbols per trace in _create_line_chart
-        # Only apply line dash style to traces that don't already have specific styling
-        if len(config.y_columns) <= 1:
-            # Single curve - apply configured marker style
+        # Only apply configured marker style when there's 1 curve and no specific y2 styling
+        if len(config.y_columns) <= 1 and not config.y2_columns:
+            # Single curve, no Y2 - apply configured marker style
             fig.update_traces(
                 marker=dict(symbol=marker_symbol),
                 selector=dict(type="scatter"),
             )
         
-        # Apply line dash style
-        fig.update_traces(
-            line=dict(dash=line_dash),
-            selector=dict(type="scatter", mode="lines+markers"),
-        )
-        fig.update_traces(
-            line=dict(dash=line_dash),
-            selector=dict(type="scatter", mode="lines"),
-        )
+        # Apply line dash style only to primary Y traces (not Y2 which use dash='dash')
+        # We don't override the dash for secondary Y axis traces
+        if not config.y2_columns:
+            fig.update_traces(
+                line=dict(dash=line_dash),
+                selector=dict(type="scatter", mode="lines+markers"),
+            )
+            fig.update_traces(
+                line=dict(dash=line_dash),
+                selector=dict(type="scatter", mode="lines"),
+            )
         
         # Add regression line if enabled
         if config.regression.enabled and config.x_column and config.y_columns:
@@ -1285,11 +1291,20 @@ class VizEngine:
         if config.y2_columns:
             ax2 = ax.twinx()
             
+            # Map marker style for Y2
+            mpl_marker_map = {
+                "circle": "o", "square": "s", "diamond": "D", "cross": "+",
+                "x": "x", "triangle-up": "^", "triangle-down": "v", "star": "*",
+            }
+            
             # Use different marker set for secondary Y axis (offset from primary)
             for i, y_col in enumerate(config.y2_columns):
                 color_idx = len(config.y_columns) + i
-                # Offset marker index for Y2 to ensure different markers
-                y2_marker = marker_list[(len(config.y_columns) + i) % len(marker_list)]
+                # Use configured marker or auto-cycle if "auto"
+                if config.y2_marker_style == "auto":
+                    y2_marker = marker_list[(len(config.y_columns) + i) % len(marker_list)]
+                else:
+                    y2_marker = mpl_marker_map.get(config.y2_marker_style, "D")
                 
                 ax2.plot(x_data, df[y_col], label=y_col, 
                         color=colors[color_idx % len(colors)],
