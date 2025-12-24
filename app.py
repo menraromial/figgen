@@ -261,36 +261,14 @@ def main():
         )
         
         if mode == "Dashboard":
-            # Dashboard mode
-            render_dashboard_mode(filtered_df, render_chart_preview)
-            
-            # Render dashboard charts
-            if "dashboard_charts" in st.session_state:
-                layout = st.session_state.get("dashboard_layout", "1x2")
-                rows, cols = map(int, layout.split("x"))
-                
-                engine = VizEngine()
-                
-                for row in range(rows):
-                    columns = st.columns(cols)
-                    for col_idx, column in enumerate(columns):
-                        chart_idx = row * cols + col_idx
-                        if chart_idx < len(st.session_state.dashboard_charts):
-                            chart_conf = st.session_state.dashboard_charts[chart_idx]
-                            if chart_conf:
-                                with column:
-                                    from core.models import ChartConfig, ChartType
-                                    mini_config = ChartConfig(
-                                        chart_type=ChartType(chart_conf["type"]),
-                                        x_column=chart_conf["x"],
-                                        y_columns=[chart_conf["y"]],
-                                        title=f"Graphique {chart_idx + 1}",
-                                    )
-                                    fig = engine.create_plotly_figure(filtered_df, mini_config)
-                                    if fig:
-                                        st.plotly_chart(fig, use_container_width=True)
+            # Dashboard mode - handles its own config and rendering
+            from viz.viz_engine import VizEngine
+            engine = VizEngine()
+            render_dashboard_mode(filtered_df, st.session_state.profile, engine)
         else:
-            # Single chart mode
+            # Single chart mode - mark as not dashboard
+            st.session_state.dashboard_mode = False
+            
             # Two-column layout: Config + Preview
             col1, col2 = st.columns([1, 2])
             
@@ -321,18 +299,28 @@ def main():
                     )
                     st.session_state.fig = fig
         
-        # Bottom section: Export and Code
+        # Bottom section: Unified Export Panel (works for both modes)
         st.markdown("---")
         
         col1, col2 = st.columns(2)
         
         with col1:
-            # Export panel
-            if st.session_state.config and st.session_state.fig:
+            # Export panel - adapts to current mode
+            is_dashboard = st.session_state.get("dashboard_mode", False)
+            if is_dashboard:
+                # Dashboard export
+                render_export_panel(
+                    st.session_state.df,
+                    None,  # No single config
+                    None,  # No single fig
+                    is_dashboard=True,
+                )
+            elif st.session_state.config and st.session_state.fig:
                 render_export_panel(
                     st.session_state.df,
                     st.session_state.config,
-                    st.session_state.fig
+                    st.session_state.fig,
+                    is_dashboard=False,
                 )
         
         with col2:

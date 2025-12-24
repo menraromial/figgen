@@ -15,34 +15,41 @@ from codegen import CodeGenerator
 
 def render_export_panel(
     df: pd.DataFrame,
-    config: ChartConfig,
+    config: Optional[ChartConfig] = None,
     fig: Optional[go.Figure] = None,
+    is_dashboard: bool = False,
 ):
     """
     Render the export panel with download options.
+    Adapts to single chart or dashboard mode.
     
     Args:
         df: DataFrame with the data
-        config: ChartConfig with visualization settings
-        fig: Optional pre-rendered Plotly figure
+        config: ChartConfig with visualization settings (None for dashboard)
+        fig: Optional pre-rendered Plotly figure (None for dashboard)
+        is_dashboard: If True, export dashboard grid instead of single chart
     """
     st.markdown('<div class="section-header"><span class="material-icons-outlined">file_download</span><h3>Export</h3></div>', unsafe_allow_html=True)
     
-    if fig is None:
-        st.info("Créez d'abord un graphique pour l'exporter")
+    if is_dashboard:
+        # Dashboard mode
+        _render_dashboard_export(df)
+    elif fig is None:
+        st.info("Creez d'abord un graphique pour l'exporter")
         return
-    
-    # Export format tabs
-    tab1, tab2, tab3 = st.tabs(["Image", "Configuration", "Données"])
-    
-    with tab1:
-        _render_image_export(df, fig, config)
-    
-    with tab2:
-        _render_config_export(config)
-    
-    with tab3:
-        _render_data_export(df)
+    else:
+        # Single chart mode
+        # Export format tabs
+        tab1, tab2, tab3 = st.tabs(["Image", "Configuration", "Donnees"])
+        
+        with tab1:
+            _render_image_export(df, fig, config)
+        
+        with tab2:
+            _render_config_export(config)
+        
+        with tab3:
+            _render_data_export(df)
 
 
 def _render_image_export(df: pd.DataFrame, fig: go.Figure, config: ChartConfig):
@@ -304,3 +311,138 @@ def _generate_filename(title: str, extension: str, prefix: str = "figure_") -> s
         base_name = f"{prefix}export"
     
     return f"{base_name}.{extension}"
+
+
+def _render_dashboard_export(df: pd.DataFrame) -> None:
+    """Render export options for dashboard mode."""
+    from io import BytesIO
+    import matplotlib.pyplot as plt
+    from core.models import ChartConfig, ChartType, AxisConfig, GridConfig, LegendConfig
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        export_format = st.selectbox(
+            "Format",
+            options=["PNG", "PDF", "SVG", "EPS"],
+            key="dashboard_export_format",
+        )
+        
+        width = st.number_input("Largeur (px)", 400, 4000, 1200, key="dashboard_export_width")
+    
+    with col2:
+        dpi = st.selectbox("Resolution (DPI)", [72, 150, 300, 600], index=2, key="dashboard_export_dpi")
+        height = st.number_input("Hauteur (px)", 300, 3000, 800, key="dashboard_export_height")
+    
+    st.markdown("---")
+    
+    if st.button("Telecharger Dashboard", key="export_dashboard_btn"):
+        num_rows = st.session_state.get("dashboard_num_rows", 1)
+        num_cols = st.session_state.get("dashboard_num_cols", 2)
+        
+        # Create figure
+        fig_width = width / dpi
+        fig_height = height / dpi
+        
+        fig, axes = plt.subplots(num_rows, num_cols, figsize=(fig_width, fig_height), dpi=dpi)
+        
+        # Handle single row/col case
+        if num_rows == 1 and num_cols == 1:
+            axes = [[axes]]
+        elif num_rows == 1:
+            axes = [axes]
+        elif num_cols == 1:
+            axes = [[ax] for ax in axes]
+        
+        engine = VizEngine()
+        configs = st.session_state.get("dashboard_configs", {})
+        
+        for row in range(num_rows):
+            for col in range(num_cols):
+                chart_idx = row * num_cols + col
+                ax = axes[row][col]
+                
+                config_dict = configs.get(chart_idx, {})
+                
+                if not config_dict or not config_dict.get("y_columns"):
+                    ax.text(0.5, 0.5, f"Graphique {chart_idx + 1}\n(non configure)", 
+                           ha='center', va='center', fontsize=12, color='gray',
+                           transform=ax.transAxes)
+                    ax.axis('off')
+                    continue
+                
+                try:
+                    config = ChartConfig(
+                        chart_type=ChartType(config_dict["chart_type"]),
+                        x_column=config_dict.get("x_column"),
+                        y_columns=config_dict.get("y_columns", []),
+                        y2_columns=config_dict.get("y2_columns", []),
+                        title=config_dict.get("title", ""),
+                        color_column=config_dict.get("color_column"),
+                        marker_size=config_dict.get("marker_size", 8.0),
+                        line_width=config_dict.get("line_width", 2.0),
+                        opacity=config_dict.get("opacity", 0.8),
+                        x_axis=AxisConfig(label=config_dict.get("x_label", "")),
+                        y_axis=AxisConfig(label=config_dict.get("y_label", "")),
+                    )
+                    
+                    # Create mini figure and copy to ax
+                    mini_fig = engine.create_matplotlib_figure(df, config)
+                    if mini_fig and mini_fig.axes:
+                        mini_ax = mini_fig.axes[0]
+                        
+                        # Copy lines
+                        for line in mini_ax.get_lines():
+                            ax.plot(line.get_xdata(), line.get_ydata(),
+                                   color=line.get_color(),
+                                   linewidth=line.get_linewidth(),
+                                   linestyle=line.get_linestyle(),
+                                   marker=line.get_marker(),
+                                   markersize=line.get_markersize(),
+                                   label=line.get_label())
+                        
+                        # Copy labels
+                        ax.set_xlabel(mini_ax.get_xlabel())
+                        ax.set_ylabel(mini_ax.get_ylabel())
+                        ax.set_title(mini_ax.get_title())
+                        ax.set_xlim(mini_ax.get_xlim())
+                        ax.set_ylim(mini_ax.get_ylim())
+                        
+                        if mini_ax.get_legend():
+                            ax.legend()
+                        
+                        plt.close(mini_fig)
+                except Exception as e:
+                    ax.text(0.5, 0.5, f"Erreur", ha='center', va='center', 
+                           fontsize=10, color='red', transform=ax.transAxes)
+        
+        plt.tight_layout()
+        
+        # Export
+        buf = BytesIO()
+        format_lower = export_format.lower()
+        
+        if format_lower == "pdf":
+            fig.savefig(buf, format='pdf', bbox_inches='tight', dpi=dpi)
+            mime = "application/pdf"
+        elif format_lower == "svg":
+            fig.savefig(buf, format='svg', bbox_inches='tight')
+            mime = "image/svg+xml"
+        elif format_lower == "eps":
+            fig.savefig(buf, format='eps', bbox_inches='tight')
+            mime = "application/postscript"
+        else:
+            fig.savefig(buf, format='png', bbox_inches='tight', dpi=dpi)
+            mime = "image/png"
+        
+        buf.seek(0)
+        plt.close(fig)
+        
+        st.download_button(
+            label=f"Telecharger Dashboard.{format_lower}",
+            data=buf.getvalue(),
+            file_name=f"dashboard.{format_lower}",
+            mime=mime,
+            key="download_dashboard_file",
+        )
+
