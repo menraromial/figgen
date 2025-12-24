@@ -1,0 +1,30 @@
+# FigGen - Scientific Figure Generator
+# Core Framework
+streamlit>=1.28.0
+
+# Data Processing
+pandas>=2.0.0
+polars>=0.19.0
+numpy>=1.24.0
+
+# Visualization
+plotly>=5.17.0
+matplotlib>=3.8.0
+seaborn>=0.13.0
+
+# Configuration & Validation
+pydantic>=2.4.0
+pyyaml>=6.0
+
+# Code Generation
+jinja2>=3.1.0
+
+# File Support
+openpyxl>=3.1.0
+xlrd>=2.0.0
+
+# Image Export
+kaleido>=1.0.0
+
+# Utilities
+python-dateutil>=2.8.0

@@ -1,0 +1,53 @@
+# FigGen default themes configuration
+
+themes:
+  nature:
+    name: "Nature"
+    description: "Style inspiré du journal Nature"
+    colors:
+      - "#0077B6"
+      - "#D62828"
+      - "#2A9D8F"
+      - "#E9C46A"
+      - "#264653"
+    font_family: "Arial"
+    font_size: 12
+
+  science:
+    name: "Science"
+    description: "Style inspiré du journal Science"
+    colors:
+      - "#1B4F72"
+      - "#922B21"
+      - "#196F3D"
+      - "#B9770E"
+      - "#5B2C6F"
+    font_family: "Helvetica"
+    font_size: 11
+
+  ieee:
+    name: "IEEE"
+    description: "Style IEEE publications techniques"
+    colors:
+      - "#00629B"
+      - "#E87722"
+      - "#78BE20"
+      - "#C4D600"
+      - "#A05EB5"
+    font_family: "Times New Roman"
+    font_size: 10
+
+export_defaults:
+  png:
+    width: 1200
+    height: 800
+    dpi: 300
+  
+  svg:
+    width: 1200
+    height: 800
+  
+  pdf:
+    width: 1200
+    height: 800
+    dpi: 300
