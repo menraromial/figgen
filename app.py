@@ -205,6 +205,15 @@ st.markdown("""
         border-radius: 6px;
         font-size: 0.875rem;
     }
+    
+    /* Sticky preview column - stays visible when scrolling config */
+    [data-testid="stHorizontalBlock"] > div:nth-child(2) {
+        position: sticky;
+        top: 60px;
+        align-self: flex-start;
+        max-height: calc(100vh - 80px);
+        overflow-y: auto;
+    }
 </style>
 """, unsafe_allow_html=True)
 

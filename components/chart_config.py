@@ -19,7 +19,7 @@ def render_chart_config(df: pd.DataFrame, profile: DataProfile) -> ChartConfig:
     Returns:
         ChartConfig with user selections
     """
-    st.markdown('<div class="section-header"><span class="material-icons-outlined">settings</span><h3>Configuration du graphique</h3></div>', unsafe_allow_html=True)
+    st.markdown("### Configuration du graphique")
     
     # Get column lists by type
     all_columns = df.columns.tolist()
@@ -49,7 +49,7 @@ def render_chart_config(df: pd.DataFrame, profile: DataProfile) -> ChartConfig:
     st.markdown("---")
     
     # Data mapping
-    st.markdown('<div class="section-header"><span class="material-icons-outlined">data_object</span><span>Mapping des données</span></div>', unsafe_allow_html=True)
+    st.markdown("**Mapping des donnees**")
     
     col1, col2 = st.columns(2)
     
@@ -148,7 +148,7 @@ def render_chart_config(df: pd.DataFrame, profile: DataProfile) -> ChartConfig:
     st.markdown("---")
     
     # Title and labels
-    st.markdown('<div class="section-header"><span class="material-icons-outlined">edit</span><span>Titre et labels</span></div>', unsafe_allow_html=True)
+    st.markdown("**Titre et labels**")
     
     title = st.text_input(
         "Titre du graphique",

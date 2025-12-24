@@ -25,7 +25,7 @@ def render_chart_preview(
     Returns:
         Plotly Figure if successful, None otherwise
     """
-    st.markdown('<div class="section-header"><span class="material-icons-outlined">preview</span><h3>Aperçu</h3></div>', unsafe_allow_html=True)
+    st.markdown("### Apercu")
     
     # Validate configuration
     if not _validate_config(config):
@@ -35,16 +35,16 @@ def render_chart_preview(
     # Create visualization engine
     engine = VizEngine()
     
-    # Render tabs for different backends
-    tab1, tab2 = st.tabs(["Plotly (Interactif)", "Matplotlib (Publication)"])
+    # Render tabs for different backends - Matplotlib first for publication focus
+    tab1, tab2 = st.tabs(["Matplotlib (Publication)", "Plotly (Interactif)"])
     
     plotly_fig = None
     
     with tab1:
-        plotly_fig = _render_plotly_preview(engine, df, config, key_suffix)
+        _render_matplotlib_preview(engine, df, config, key_suffix)
     
     with tab2:
-        _render_matplotlib_preview(engine, df, config, key_suffix)
+        plotly_fig = _render_plotly_preview(engine, df, config, key_suffix)
     
     return plotly_fig
 
@@ -129,7 +129,7 @@ def render_comparison_view(
         df: DataFrame with the data
         configs: List of ChartConfig to compare
     """
-    st.markdown('<div class="section-header"><span class="material-icons-outlined">compare</span><h3>Comparaison</h3></div>', unsafe_allow_html=True)
+    st.markdown("### Comparaison")
     
     if len(configs) < 2:
         st.info("Ajoutez au moins 2 configurations pour comparer")

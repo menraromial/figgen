@@ -15,7 +15,7 @@ def render_code_viewer(config: ChartConfig, data_filename: str = "data.csv"):
         config: ChartConfig with visualization settings
         data_filename: Name of the data file for the script
     """
-    st.markdown('<div class="section-header"><span class="material-icons-outlined">code</span><h3>Code Python</h3></div>', unsafe_allow_html=True)
+    st.markdown("### Code Python")
     
     generator = CodeGenerator()
     

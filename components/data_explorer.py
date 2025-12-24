@@ -17,7 +17,7 @@ def render_data_explorer(df: pd.DataFrame) -> Optional[DataProfile]:
     Returns:
         DataProfile with analysis results
     """
-    st.markdown('<div class="section-header"><span class="material-icons-outlined">search</span><span>Exploration des données</span></div>', unsafe_allow_html=True)
+    st.markdown("### Exploration des donnees")
     
     # Analyze data
     analyzer = DataAnalyzer()
@@ -116,7 +116,7 @@ def _render_suggestions(profile: DataProfile):
     if profile.suggested_charts:
         for i, chart_type in enumerate(profile.suggested_charts[:5]):
             icon = _get_chart_icon(chart_type)
-            st.markdown(f'{i+1}. <span class="material-icons-outlined" style="font-size:1rem;vertical-align:middle;">{icon}</span> **{chart_type.title()}**', unsafe_allow_html=True)
+            st.markdown(f'{i+1}. **{chart_type.title()}**')
     else:
         st.info("Aucune suggestion disponible pour ce jeu de données")
     

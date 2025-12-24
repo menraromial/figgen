@@ -29,7 +29,7 @@ def render_export_panel(
         fig: Optional pre-rendered Plotly figure (None for dashboard)
         is_dashboard: If True, export dashboard grid instead of single chart
     """
-    st.markdown('<div class="section-header"><span class="material-icons-outlined">file_download</span><h3>Export</h3></div>', unsafe_allow_html=True)
+    st.markdown("### Export")
     
     if is_dashboard:
         # Dashboard mode
