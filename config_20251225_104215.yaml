@@ -1,0 +1,127 @@
+chart_type: line
+x_column: Timestamp_Sec
+y_columns:
+- S0_PKG_W
+- S0_DRAM_W
+color_column: null
+size_column: null
+facet_column: null
+y2_columns: []
+y2_axis:
+  label: ''
+  min_value: null
+  max_value: null
+  log_scale: false
+  show_grid: true
+  tick_format: null
+  start_zero: false
+aggregation: null
+group_by: null
+title: ''
+subtitle: null
+x_axis:
+  label: Time (s)
+  min_value: null
+  max_value: null
+  log_scale: false
+  show_grid: true
+  tick_format: null
+  start_zero: false
+y_axis:
+  label: Power (w)
+  min_value: null
+  max_value: null
+  log_scale: false
+  show_grid: true
+  tick_format: null
+  start_zero: false
+legend:
+  show: true
+  position: bottom_center
+  orientation: horizontal
+  title: null
+  font_size: 4
+  font_color: '#000000'
+  font_family: sans-serif
+  font_bold: false
+  background_color: '#FFFFFF'
+  background_alpha: 0.0
+  border_show: false
+  border_color: '#CCCCCC'
+  border_width: 1.0
+  border_style: solid
+  border_radius: 0.0
+  shadow_show: false
+  shadow_color: '#666666'
+  shadow_offset_x: 2.0
+  shadow_offset_y: 2.0
+  shadow_blur: 4.0
+  padding: 5.0
+  column_spacing: 1.0
+  marker_scale: 1.0
+  num_columns: 1
+grid:
+  show: true
+  color: '#ce2ad4'
+  width: 0.5
+  style: dotted
+  opacity: 0.5
+  show_minor: false
+  minor_color: '#EEEEEE'
+  minor_width: 0.5
+  minor_opacity: 0.3
+theme: ieee
+color_palette: null
+marker_size: 1.0
+line_width: 0.5
+opacity: 0.8
+marker_style: circle
+line_style: solid
+y2_marker_style: auto
+show_values: false
+annotations:
+- type: arrow
+  text: Turbo
+  x: 3.5
+  y: 0.0
+  x_end: 20.0
+  y_end: 0.0
+  font_size: 6
+  color: '#f1345c'
+  arrow_head: true
+  arrow_head_style: triangle
+  line_width: 1.0
+  use_data_coords: true
+  opacity: 1.0
+  background_color: null
+  background_opacity: 0.3
+  border_color: null
+  border_width: 1.0
+  fill_opacity: 0.2
+- type: rect
+  text: ''
+  x: 0.0
+  y: 0.0
+  x_end: 3.5
+  y_end: 195.0
+  font_size: 12
+  color: '#f1327e'
+  arrow_head: true
+  arrow_head_style: triangle
+  line_width: 1.0
+  use_data_coords: true
+  opacity: 0.5
+  background_color: null
+  background_opacity: 0.3
+  border_color: null
+  border_width: 1.0
+  fill_opacity: 0.1
+regression:
+  enabled: false
+  type: linear
+  degree: 2
+  show_equation: true
+  show_r2: true
+  line_color: '#ff0000'
+  line_width: 2
+  line_style: dash

@@ -101,6 +101,16 @@ class AxisConfig(BaseModel):
     show_grid: bool = True
     tick_format: Optional[str] = None
     start_zero: bool = False  # Force axis to start from 0
+    # Label styling
+    label_font_size: int = 12
+    label_color: str = "#000000"
+    label_font_family: str = "sans-serif"
+    label_bold: bool = False
+    label_rotation: float = 0.0  # Rotation angle for label
+    # Tick styling
+    tick_font_size: int = 10
+    tick_color: str = "#000000"
+    tick_rotation: float = 0.0  # Rotation angle for tick labels
 
 
 class GridConfig(BaseModel):
@@ -123,7 +133,29 @@ class LegendConfig(BaseModel):
     orientation: str = "vertical"  # vertical, horizontal
     title: Optional[str] = None
     font_size: int = 10
+    font_color: str = "#000000"
+    font_family: str = "sans-serif"
+    font_bold: bool = False
+    # Background
+    background_color: str = "#FFFFFF"
     background_alpha: float = 0.8  # Transparency of legend background
+    # Border
+    border_show: bool = True
+    border_color: str = "#CCCCCC"
+    border_width: float = 1.0
+    border_style: str = "solid"  # solid, dashed, dotted, dashdot
+    border_radius: float = 0.0  # Border corner radius (Plotly only)
+    # Shadow
+    shadow_show: bool = False
+    shadow_color: str = "#666666"
+    shadow_offset_x: float = 2.0
+    shadow_offset_y: float = 2.0
+    shadow_blur: float = 4.0
+    # Layout
+    padding: float = 5.0  # Internal padding
+    column_spacing: float = 1.0  # Spacing between columns (for multi-column legend)
+    marker_scale: float = 1.0  # Scale factor for legend markers
+    num_columns: int = 1  # Number of columns in legend
 
 
 class AnnotationType(str, Enum):
@@ -242,17 +274,23 @@ class ChartConfig(BaseModel):
     regression: RegressionConfig = Field(default_factory=RegressionConfig)
     
     def to_yaml(self) -> str:
-        """Export configuration to YAML."""
-        return yaml.dump(self.model_dump(), default_flow_style=False, allow_unicode=True)
+        """Export configuration to YAML (portable, no Python objects)."""
+        # Use model_dump with mode='json' to convert enums to strings
+        data = self.model_dump(mode='json')
+        return yaml.dump(data, default_flow_style=False, allow_unicode=True, sort_keys=False)
     
     def to_json(self) -> str:
         """Export configuration to JSON."""
-        return json.dumps(self.model_dump(), indent=2, ensure_ascii=False)
+        return json.dumps(self.model_dump(mode='json'), indent=2, ensure_ascii=False)
     
     @classmethod
     def from_yaml(cls, yaml_str: str) -> "ChartConfig":
         """Load configuration from YAML."""
-        return cls(**yaml.safe_load(yaml_str))
+        try:
+            data = yaml.safe_load(yaml_str)
+            return cls(**data)
+        except Exception as e:
+            raise ValueError(f"Erreur de chargement YAML: {str(e)}")
     
     @classmethod
     def from_json(cls, json_str: str) -> "ChartConfig":

@@ -1,17 +1,17 @@
 # FigGen - Scientific Figure Generator
 
-🎨 **Application web professionnelle 100% Python pour la génération de graphiques scientifiques de haute qualité.**
+**Application web professionnelle 100% Python pour la génération de graphiques scientifiques de haute qualité.**
 
-## ✨ Fonctionnalités
+## Fonctionnalités
 
-- 📁 **Multi-format**: CSV, JSON, YAML, Excel, Parquet
-- 🔍 **Auto-détection**: Types de colonnes, séries temporelles, données manquantes
-- 📊 **10+ types de graphiques**: Courbes, scatter, barres, histogrammes, boxplots, heatmaps...
-- 🎨 **Thèmes publication**: Nature, Science, IEEE, Modern Dark, Minimal...
-- 📝 **Code reproductible**: Scripts Python Plotly & Matplotlib générés automatiquement
-- 📤 **Export HD**: PNG, SVG, PDF jusqu'à 600 DPI
+- **Multi-format**: CSV, JSON, YAML, Excel, Parquet
+-  **Auto-détection**: Types de colonnes, séries temporelles, données manquantes
+- **10+ types de graphiques**: Courbes, scatter, barres, histogrammes, boxplots, heatmaps...
+- **Thèmes publication**: Nature, Science, IEEE, Modern Dark, Minimal...
+- **Code reproductible**: Scripts Python Plotly & Matplotlib générés automatiquement
+- **Export HD**: PNG, SVG, PDF jusqu'à 600 DPI
 
-## 🚀 Installation
+## Installation
 
 ```bash
 # Cloner ou naviguer vers le projet
@@ -26,7 +26,7 @@ source venv/bin/activate  # Linux/Mac
 pip install -r requirements.txt
 ```
 
-## ▶️ Lancement
+## Lancement
 
 ```bash
 streamlit run app.py
@@ -34,7 +34,7 @@ streamlit run app.py
 
 L'application sera accessible à l'adresse `http://localhost:8501`
 
-## 📖 Utilisation
+## Utilisation
 
 1. **Chargez vos données** via drag & drop ou en cliquant sur le bouton d'upload
 2. **Explorez** les colonnes détectées automatiquement (numériques, catégorielles, temporelles)
@@ -49,7 +49,7 @@ L'application sera accessible à l'adresse `http://localhost:8501`
    - Configuration: JSON ou YAML pour réutilisation
    - Code: Script Python reproductible
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 figgen/
@@ -87,19 +87,19 @@ figgen/
 | Configuration | Pydantic |
 | Code Generation | Jinja2 |
 
-## 📊 Types de graphiques supportés
+## Types de graphiques supportés
 
-- 📈 Courbes (Line)
+- Courbes (Line)
 - ⚬ Nuage de points (Scatter)
-- 📊 Barres (Bar)
-- 📶 Histogramme
-- 📦 Box plot
-- 🎻 Violin plot
-- 🔥 Heatmap
-- 📉 Aires (Area)
-- 🥧 Camembert (Pie)
-- 🔵 Bulles (Bubble)
+-  Barres (Bar)
+-  Histogramme
+-  Box plot
+-  Violin plot
+-  Heatmap
+-  Aires (Area)
+-  Camembert (Pie)
+-  Bulles (Bubble)
 
-## 📄 Licence
+##  Licence
 
 MIT License - Libre d'utilisation pour la recherche et les publications scientifiques.

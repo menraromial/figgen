@@ -145,13 +145,34 @@ def _export_matplotlib(df: pd.DataFrame, config: ChartConfig, format_option: str
         # Set figure size based on width/height
         mpl_fig.set_size_inches(width / dpi, height / dpi)
         
-        # Export to bytes
+        # Use subplots_adjust for direct margin control based on legend position
+        import matplotlib.pyplot as plt
+        if config.legend.show:
+            legend_pos = config.legend.position
+            if legend_pos in ["bottom", "bottom_center"]:
+                # Add extra bottom margin for bottom legend + X-axis label
+                mpl_fig.subplots_adjust(bottom=0.25, left=0.18, right=0.95, top=0.92)
+            elif legend_pos in ["top", "top_center"]:
+                # Add extra top margin for top legend
+                mpl_fig.subplots_adjust(bottom=0.15, left=0.18, right=0.95, top=0.75)
+            elif legend_pos == "left":
+                # Add extra left margin for left legend
+                mpl_fig.subplots_adjust(bottom=0.15, left=0.28, right=0.95, top=0.92)
+            elif legend_pos == "right":
+                # Add extra right margin for right legend
+                mpl_fig.subplots_adjust(bottom=0.15, left=0.18, right=0.75, top=0.92)
+            else:
+                # Inside positions - standard margins with larger left for Y label
+                mpl_fig.subplots_adjust(bottom=0.15, left=0.18, right=0.95, top=0.92)
+        else:
+            mpl_fig.subplots_adjust(bottom=0.15, left=0.18, right=0.95, top=0.92)
+        
+        # Export to bytes - NOT using bbox_inches='tight' to preserve our margins
         buffer = io.BytesIO()
         mpl_fig.savefig(
             buffer,
             format=format_option.lower(),
             dpi=dpi,
-            bbox_inches='tight',
             facecolor='white',
             edgecolor='none',
         )
@@ -222,6 +243,14 @@ def _render_config_export(config: ChartConfig):
         key="config_upload",
     )
     
+    # Check if we already processed a config this session
+    if st.session_state.get("config_loaded_flag"):
+        st.info("Configuration chargee. Le graphique est visible dans l'apercu.")
+        if st.button("Charger une autre configuration", key="clear_config_flag"):
+            st.session_state["config_loaded_flag"] = False
+            st.rerun()
+        return
+    
     if uploaded_config:
         try:
             content = uploaded_config.read().decode("utf-8")
@@ -230,14 +259,91 @@ def _render_config_export(config: ChartConfig):
             else:
                 loaded_config = ChartConfig.from_yaml(content)
             
-            st.success("Configuration chargée!")
-            st.json(loaded_config.model_dump())
+            # Store config as pending - will be applied before widgets in chart_config.py
+            st.session_state["pending_config_load"] = loaded_config
+            st.session_state["config"] = loaded_config
+            st.session_state["config_loaded_flag"] = True
             
-            # Store in session state for use
-            st.session_state["loaded_config"] = loaded_config
+            st.success("Configuration chargee!")
+            st.rerun()
             
         except Exception as e:
             st.error(f"Erreur de chargement: {str(e)}")
+
+
+def _populate_session_state_from_config(config: ChartConfig):
+    """Populate Streamlit session state keys from a loaded ChartConfig."""
+    # Basic chart settings
+    st.session_state["chart_type"] = config.chart_type.value
+    st.session_state["x_column"] = config.x_column or ""
+    st.session_state["y_columns"] = config.y_columns or []
+    st.session_state["y2_columns"] = config.y2_columns or []
+    st.session_state["color_column"] = config.color_column
+    
+    # Title and labels
+    st.session_state["chart_title"] = config.title or ""
+    st.session_state["x_label"] = config.x_axis.label if config.x_axis else ""
+    st.session_state["y_label"] = config.y_axis.label if config.y_axis else ""
+    st.session_state["y2_label"] = config.y2_axis.label if config.y2_axis else ""
+    
+    # Style elements
+    st.session_state["marker_size"] = config.marker_size
+    st.session_state["line_width"] = config.line_width
+    st.session_state["opacity"] = config.opacity
+    st.session_state["marker_style"] = config.marker_style
+    st.session_state["line_style"] = config.line_style
+    st.session_state["y2_marker_style"] = config.y2_marker_style or "auto"
+    
+    # Grid settings
+    if config.grid:
+        st.session_state["show_grid_x"] = config.grid.show
+        st.session_state["show_grid_y"] = config.grid.show
+        st.session_state["grid_color"] = config.grid.color
+        st.session_state["grid_width"] = config.grid.width
+        st.session_state["grid_opacity"] = config.grid.opacity
+        st.session_state["grid_style"] = config.grid.style
+    
+    # Axis settings
+    if config.y_axis:
+        st.session_state["y_start_zero"] = config.y_axis.start_zero
+    if config.y2_axis:
+        st.session_state["y2_start_zero"] = config.y2_axis.start_zero
+    
+    # Legend settings
+    if config.legend:
+        st.session_state["show_legend"] = config.legend.show
+        st.session_state["legend_position"] = config.legend.position
+        st.session_state["legend_orientation"] = config.legend.orientation
+        st.session_state["legend_font_size"] = config.legend.font_size
+        st.session_state["legend_font_color"] = config.legend.font_color
+        st.session_state["legend_font_family"] = config.legend.font_family
+        st.session_state["legend_font_bold"] = config.legend.font_bold
+        st.session_state["legend_bg_color"] = config.legend.background_color
+        st.session_state["legend_bg_alpha"] = config.legend.background_alpha
+        st.session_state["legend_border_show"] = config.legend.border_show
+        st.session_state["legend_border_color"] = config.legend.border_color
+        st.session_state["legend_border_width"] = config.legend.border_width
+        st.session_state["legend_border_style"] = config.legend.border_style
+        st.session_state["legend_shadow_show"] = config.legend.shadow_show
+        st.session_state["legend_shadow_color"] = config.legend.shadow_color
+        st.session_state["legend_shadow_x"] = config.legend.shadow_offset_x
+        st.session_state["legend_shadow_y"] = config.legend.shadow_offset_y
+        st.session_state["legend_padding"] = config.legend.padding
+        st.session_state["legend_column_spacing"] = config.legend.column_spacing
+        st.session_state["legend_marker_scale"] = config.legend.marker_scale
+        st.session_state["legend_columns"] = config.legend.num_columns
+    
+    # Regression settings
+    if config.regression:
+        st.session_state["regression_enabled"] = config.regression.enabled
+        st.session_state["regression_type"] = config.regression.type.value if hasattr(config.regression.type, 'value') else config.regression.type
+        st.session_state["regression_degree"] = config.regression.degree
+        st.session_state["regression_show_eq"] = config.regression.show_equation
+        st.session_state["regression_show_r2"] = config.regression.show_r2
+    
+    # Theme
+    if config.theme:
+        st.session_state["theme"] = config.theme
 
 
 def _render_data_export(df: pd.DataFrame):

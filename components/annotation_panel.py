@@ -15,7 +15,11 @@ def render_annotation_panel() -> list[AnnotationConfig]:
     annotations = []
     
     # Initialize session state for annotations
-    if "chart_annotations" not in st.session_state:
+    # Check if annotations were loaded from a config file
+    if "annotations" in st.session_state and st.session_state.annotations:
+        st.session_state.chart_annotations = list(st.session_state.annotations)
+        del st.session_state["annotations"]  # Clear to avoid re-loading
+    elif "chart_annotations" not in st.session_state:
         st.session_state.chart_annotations = []
     
     with st.expander("Annotations", expanded=False):

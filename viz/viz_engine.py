@@ -1010,10 +1010,42 @@ class VizEngine:
             
             # Common styling
             ax.set_title(config.title, fontsize=theme["font_size"] + 2, fontweight='bold')
+            
+            # X-axis label with styling
             if config.x_axis.label:
-                ax.set_xlabel(config.x_axis.label, fontsize=theme["font_size"])
+                ax.set_xlabel(
+                    config.x_axis.label, 
+                    fontsize=config.x_axis.label_font_size,
+                    color=config.x_axis.label_color,
+                    rotation=config.x_axis.label_rotation,
+                    fontweight='bold' if config.x_axis.label_bold else 'normal',
+                    labelpad=5,  # Small padding
+                )
+            
+            # Y-axis label with styling
             if config.y_axis.label:
-                ax.set_ylabel(config.y_axis.label, fontsize=theme["font_size"])
+                ax.set_ylabel(
+                    config.y_axis.label, 
+                    fontsize=config.y_axis.label_font_size,
+                    color=config.y_axis.label_color,
+                    rotation=config.y_axis.label_rotation,
+                    fontweight='bold' if config.y_axis.label_bold else 'normal',
+                    labelpad=5,  # Small padding
+                )
+            
+            # Tick styling
+            ax.tick_params(
+                axis='x', 
+                labelsize=config.x_axis.tick_font_size, 
+                labelcolor=config.x_axis.tick_color,
+                rotation=config.x_axis.tick_rotation,
+            )
+            ax.tick_params(
+                axis='y', 
+                labelsize=config.y_axis.tick_font_size, 
+                labelcolor=config.y_axis.tick_color,
+                rotation=config.y_axis.tick_rotation,
+            )
             
             # Legend configuration
             if config.legend.show:
@@ -1043,13 +1075,13 @@ class VizEngine:
                         bbox = (0.5, 1.02)
                     elif config.legend.position == "bottom":
                         loc = "upper center"
-                        bbox = (0.5, -0.12)
+                        bbox = (0.5, -0.25)  # Lower to avoid X-axis label
                     elif config.legend.position == "top_center":
                         loc = "lower center"
                         bbox = (0.5, 1.05)
                     elif config.legend.position == "bottom_center":
                         loc = "upper center"
-                        bbox = (0.5, -0.15)
+                        bbox = (0.5, -0.30)  # Lower to avoid X-axis label
                     elif config.legend.position == "inside_top_right":
                         loc = "upper right"
                     elif config.legend.position == "inside_top_left":
@@ -1063,16 +1095,69 @@ class VizEngine:
                     elif config.legend.position == "inside_bottom_center":
                         loc = "lower center"
                     
-                    ncol = 1 if config.legend.orientation == "vertical" else len(handles)
+                    ncol = config.legend.num_columns if config.legend.num_columns > 1 else (1 if config.legend.orientation == "vertical" else len(handles))
                     
-                    ax.legend(
+                    # Build font properties
+                    from matplotlib.font_manager import FontProperties
+                    font_weight = 'bold' if config.legend.font_bold else 'normal'
+                    font_props = FontProperties(
+                        family=config.legend.font_family,
+                        size=config.legend.font_size,
+                        weight=font_weight,
+                    )
+                    
+                    # Build face color with alpha
+                    import matplotlib.colors as mcolors
+                    try:
+                        bg_rgba = mcolors.to_rgba(config.legend.background_color, alpha=config.legend.background_alpha)
+                    except:
+                        bg_rgba = (1, 1, 1, config.legend.background_alpha)
+                    
+                    # Build edge color and style
+                    if config.legend.border_show:
+                        edge_color = config.legend.border_color
+                        edge_width = config.legend.border_width
+                    else:
+                        edge_color = 'none'
+                        edge_width = 0
+                    
+                    # Create legend
+                    legend = ax.legend(
                         handles, labels,
                         loc=loc,
-                        fontsize=config.legend.font_size,
-                        framealpha=config.legend.background_alpha,
+                        prop=font_props,
+                        framealpha=1.0,  # We handle alpha in facecolor
                         ncol=ncol,
                         bbox_to_anchor=bbox,
+                        columnspacing=config.legend.column_spacing,
+                        borderpad=config.legend.padding / 10,  # Scale padding
+                        markerscale=config.legend.marker_scale,
                     )
+                    
+                    # Apply custom frame styling
+                    frame = legend.get_frame()
+                    frame.set_facecolor(bg_rgba)
+                    frame.set_edgecolor(edge_color)
+                    frame.set_linewidth(edge_width)
+                    
+                    # Apply border style
+                    linestyle_map = {
+                        "solid": "-",
+                        "dashed": "--",
+                        "dotted": ":",
+                        "dashdot": "-.",
+                    }
+                    frame.set_linestyle(linestyle_map.get(config.legend.border_style, "-"))
+                    
+                    # Apply font color
+                    for text in legend.get_texts():
+                        text.set_color(config.legend.font_color)
+                    
+                    # Apply shadow if enabled
+                    if config.legend.shadow_show:
+                        legend.set_frame_on(True)
+                        # Matplotlib doesn't have native shadow, but we set shadow=True
+                        legend.shadow = True
             
             # Grid - using GridConfig options
             if config.grid.show and (config.x_axis.show_grid or config.y_axis.show_grid):
@@ -1103,7 +1188,28 @@ class VizEngine:
             if config.annotations:
                 self._add_mpl_annotations(ax, config)
             
-            plt.tight_layout()
+            # Adjust layout with extra space for legend position
+            # Handle bottom legend position to avoid overlapping X-axis label
+            if config.legend.show:
+                legend_pos = config.legend.position
+                if legend_pos in ["bottom", "bottom_center"]:
+                    # Add extra bottom padding for bottom legend
+                    plt.tight_layout(rect=[0, 0.15, 1, 1])  # Leave 15% space at bottom
+                elif legend_pos in ["top", "top_center"]:
+                    # Add extra top padding for top legend
+                    plt.tight_layout(rect=[0, 0, 1, 0.90])  # Leave 10% space at top
+                elif legend_pos == "left":
+                    # Add extra left padding for left legend
+                    plt.tight_layout(rect=[0.15, 0, 1, 1])  # Leave 15% space at left
+                elif legend_pos == "right":
+                    # Add extra right padding for right legend
+                    plt.tight_layout(rect=[0, 0, 0.85, 1])  # Leave 15% space at right
+                else:
+                    # Inside positions - normal tight layout
+                    plt.tight_layout()
+            else:
+                plt.tight_layout()
+            
             return fig
             
         except Exception as e:

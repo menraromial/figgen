@@ -30,7 +30,7 @@ from viz import VizEngine
 # Page configuration
 st.set_page_config(
     page_title="FigGen - Scientific Figure Generator",
-    page_icon="📊",
+    page_icon="",
     layout="wide",
     initial_sidebar_state="expanded",
 )
