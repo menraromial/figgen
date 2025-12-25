@@ -101,10 +101,10 @@ def render_annotation_panel() -> list[AnnotationConfig]:
                     st.caption("Origine de la flèche")
                     col1, col2 = st.columns(2)
                     with col1:
-                        x_end = st.number_input("X (origine)", value=float(ann.x_end or ann.x - 20), key=f"ann_xe_{i}", format="%.1f")
+                        x_end = st.number_input("X (origine)", value=float(ann.x_end if ann.x_end is not None else ann.x - 20), key=f"ann_xe_{i}", format="%.1f")
                         st.session_state.chart_annotations[i].x_end = x_end
                     with col2:
-                        y_end = st.number_input("Y (origine)", value=float(ann.y_end or ann.y - 20), key=f"ann_ye_{i}", format="%.1f")
+                        y_end = st.number_input("Y (origine)", value=float(ann.y_end if ann.y_end is not None else ann.y - 20), key=f"ann_ye_{i}", format="%.1f")
                         st.session_state.chart_annotations[i].y_end = y_end
                     
                     # Arrow head style
@@ -137,10 +137,10 @@ def render_annotation_panel() -> list[AnnotationConfig]:
                     st.caption("Point d'arrivée")
                     col1, col2 = st.columns(2)
                     with col1:
-                        x_end = st.number_input("X2", value=float(ann.x_end or ann.x + 20), key=f"ann_xe_{i}", format="%.1f")
+                        x_end = st.number_input("X2", value=float(ann.x_end if ann.x_end is not None else ann.x + 20), key=f"ann_xe_{i}", format="%.1f")
                         st.session_state.chart_annotations[i].x_end = x_end
                     with col2:
-                        y_end = st.number_input("Y2", value=float(ann.y_end or ann.y), key=f"ann_ye_{i}", format="%.1f")
+                        y_end = st.number_input("Y2", value=float(ann.y_end if ann.y_end is not None else ann.y), key=f"ann_ye_{i}", format="%.1f")
                         st.session_state.chart_annotations[i].y_end = y_end
                 
                 elif ann.type == AnnotationType.RECT:
@@ -157,8 +157,8 @@ def render_annotation_panel() -> list[AnnotationConfig]:
                     col1, col2 = st.columns(2)
                     
                     # Calculate current width/height
-                    current_width = (ann.x_end or ann.x + 10) - ann.x
-                    current_height = (ann.y_end or ann.y + 10) - ann.y
+                    current_width = (ann.x_end if ann.x_end is not None else ann.x + 10) - ann.x
+                    current_height = (ann.y_end if ann.y_end is not None else ann.y + 10) - ann.y
                     
                     with col1:
                         width = st.number_input("Largeur", value=float(abs(current_width)), min_value=0.1, key=f"ann_w_{i}", format="%.1f")
